@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Delta Chat Server Infrastructure
+# Optimized for high-availability in restricted network environments (Intranet-ready).
+
+services:
+  mailserver:
+    image: mailserver/docker-mailserver:latest
+    container_name: deltachat_server
+    hostname: mail
+    domainname: ${MY_DOMAIN} # Dynamically loaded from .env
+    
+    ports:
+      - "25:25"    # Mail Exchange
+      - "143:143"  # IMAP
+      - "587:587"  # SMTP Submission
+      - "993:993"  # IMAP SSL
+      - "465:465"  # SMTP SSL
+      
+    volumes:
+      - ./maildata:/var/mail
+      - ./mailstate:/var/mail-state
+      - ./config:/tmp/docker-mailserver
+      - /etc/localtime:/etc/localtime:ro
+      
+    environment:
+      - ENABLE_SPAMASSASSIN=0 # Disabled to save CPU/RAM
+      - ENABLE_CLAMAV=0       # Disabled to save CPU/RAM
+      - ENABLE_FAIL2BAN=1     # Security: Auto-ban malicious IPs
+      - SSL_TYPE=none         # Default to none. Set 'letsencrypt' for production
+      - ONE_DIR=1
+      - SPOOF_PROTECTION=1
+      - REPORT_RECIPIENT=0
+      
+    restart: always
+
+networks:
+  default:
+    name: deltachat_network

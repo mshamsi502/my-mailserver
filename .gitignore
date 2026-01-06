@@ -1,0 +1,12 @@
+# Docker Mailserver Data (Crucial: Do not upload your private emails)
+maildata/
+mailstate/
+config/
+
+# Environment Files
+.env
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
