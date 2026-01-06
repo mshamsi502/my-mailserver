@@ -2,9 +2,12 @@
 
 # ==============================================================================
 # Script Name: init-vps.sh
-# Description: Automated system preparation for Ubuntu 24.04 Delta Chat Server.
-# Author: mshamsi
+# Description: Automated system preparation for Delta Chat Server.
+# Features: Auto-detects hostname and configures environment.
 # ==============================================================================
+
+# Auto-detect current hostname
+CURRENT_HOSTNAME=$(hostname)
 
 echo "[LOG] Step 1: Terminating conflicting update processes..."
 sudo systemctl stop unattended-upgrades
@@ -16,9 +19,10 @@ sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/apt/ar
 echo "[LOG] Step 3: Repairing interrupted installations..."
 sudo dpkg --configure -a
 
-echo "[LOG] Step 4: Configuring local hostname resolution..."
-if ! grep -q "127.0.0.1 mshamsi" /etc/hosts; then
-    echo "127.0.0.1 mshamsi" | sudo tee -a /etc/hosts
+echo "[LOG] Step 4: Configuring hostname resolution for '$CURRENT_HOSTNAME'..."
+# Ensures the system can resolve its own name to avoid 'unable to resolve host' errors
+if ! grep -q "127.0.0.1 $CURRENT_HOSTNAME" /etc/hosts; then
+    echo "127.0.0.1 $CURRENT_HOSTNAME" | sudo tee -a /etc/hosts
 fi
 
 echo "[LOG] Step 5: Installing Docker and Docker-Compose..."
@@ -39,4 +43,4 @@ sudo ufw --force enable
 echo "[LOG] Step 7: Verifying active ports..."
 sudo netstat -tulpen | grep -E '25|143|587|993'
 
-echo "[SUCCESS] VPS initialization completed successfully."
+echo "[SUCCESS] VPS initialization for '$CURRENT_HOSTNAME' completed."
